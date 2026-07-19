@@ -2,144 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Prototype Island Homecoming showcase Docent's Attendance</title>
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PIHCS Docent Attendance</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @font-face {
-      font-family: 'TitleFont';
-      src: url('TRIAL_OTT_Buzz.otf') format('opentype');
-    }
-    @font-face {
-      font-family: 'BodyFont';
+      font-family: 'SystemMono';
       src: url('MDSystemMonoTrial-Medium.otf') format('opentype');
     }
-
-    :root {
-      --bg-color: #0957C3;
-      --surface-color: #074BA8; 
-      --text-main: #ffffff;
-      --text-muted: #b0ccef; 
-      --border-color: #176BDE; 
-      --btn-text: #0957C3;
+    @font-face {
+      font-family: 'Buzz';
+      src: url('TRIAL_OTT_Buzz.otf') format('opentype');
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'BodyFont', sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      padding: 16px;
-      line-height: 1.5;
-    }
-
-    .container { max-width: 600px; margin: 0 auto; padding-bottom: 40px; }
-
-    header { text-align: center; margin-bottom: 24px; }
-    h1 {
-      font-family: 'TitleFont', sans-serif;
-      font-size: 1.8rem;
-      line-height: 1.1;
-      font-weight: normal;
-    }
-    .subtitle {
-      display: block;
-      font-size: 1.1rem;
-      color: var(--text-muted);
-      margin-top: 8px;
-    }
-
-    .form-group { margin-bottom: 16px; }
-    input[type="text"] {
-      width: 100%;
-      padding: 14px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      background: var(--surface-color);
-      color: #ffffff;
-      font-size: 1rem;
-    }
-
-    .camera-btn {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      padding: 16px;
-      background-color: rgba(255, 255, 255, 0.05); 
-      border: 1px dashed #cbd5e1;
-      border-radius: 8px;
-      color: #cbd5e1;
-      cursor: pointer;
-    }
-    
-    .action-row { display: flex; gap: 12px; margin-bottom: 32px; }
-    button {
-      border: none;
-      border-radius: 8px;
-      padding: 16px;
-      font-size: 1.1rem;
-      font-family: 'BodyFont', sans-serif;
-      cursor: pointer;
-    }
-
-    .btn-in { background-color: #f8fafc; color: var(--btn-text); flex: 1; }
-    .btn-out { background-color: transparent; color: #cbd5e1; border: 2px solid #cbd5e1; flex: 1; }
-    
-    .table-wrapper { background: var(--surface-color); border-radius: 8px; overflow-x: auto; border: 1px solid var(--border-color); }
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
-    th, td { padding: 12px; border-bottom: 1px solid var(--border-color); }
-    .td-photo img { width: 48px; height: 48px; object-fit: cover; border-radius: 4px; }
-
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
-    .modal-overlay.active { display: flex; }
-    .modal-box { background: var(--surface-color); padding: 24px; border-radius: 12px; width: 90%; max-width: 300px; text-align: center; border: 1px solid var(--border-color); }
+    body { background-color: #0957C3; color: white; font-family: 'SystemMono', sans-serif; }
+    h1 { font-family: 'Buzz', sans-serif; }
   </style>
 </head>
-<body>
-
-  <div id="alert-modal" class="modal-overlay">
-    <div class="modal-box">
-      <div id="alert-msg" style="margin-bottom:20px;"></div>
-      <button onclick="closeAlert()" style="background: white; color: #0957C3; padding: 8px 16px;">OK</button>
-    </div>
-  </div>
-
-  <div class="container">
-    <header>
-      <h1>Prototype Island Homecoming Showcase</h1>
-      <span class="subtitle">Docent's Attendance</span>
+<body class="p-4">
+  <div class="max-w-md mx-auto">
+    <header class="text-center mb-6">
+      <h1 class="text-3xl font-bold">PROTOTYPE ISLAND HOMECOMING</h1>
+      <p class="text-blue-200">DOCENT'S ATTENDANCE</p>
     </header>
 
-    <div class="form-group">
-      <input type="text" id="docent-name" placeholder="Full Name">
-    </div>
-
-    <div class="form-group">
-      <label class="camera-btn">
-        📷 Take a picture of yourself
-        <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none;">
+    <div class="space-y-4">
+      <input type="text" id="docent-name" placeholder="Full Name" class="w-full p-3 rounded-lg bg-blue-900 border border-blue-600 text-white placeholder-blue-300">
+      
+      <label class="block w-full p-4 text-center border-2 border-dashed border-blue-400 rounded-lg cursor-pointer hover:bg-blue-800 transition">
+        📷 <span id="photo-label">Take a picture of yourself</span>
+        <input type="file" id="camera-input" accept="image/*" capture="environment" class="hidden">
       </label>
-    </div>
 
-    <div class="action-row">
-      <button type="button" class="btn-in" id="btn-in">Check in</button>
-      <button type="button" class="btn-out" id="btn-out">Check out</button>
-    </div>
+      <div class="flex gap-4">
+        <button id="btn-in" class="flex-1 p-4 bg-white text-blue-900 font-bold rounded-lg shadow-lg hover:bg-gray-100 transition">Check in</button>
+        <button id="btn-out" class="flex-1 p-4 bg-transparent border border-blue-400 text-blue-100 rounded-lg hover:bg-blue-800 transition">Check out</button>
+      </div>
 
-    <div class="table-wrapper">
-      <table id="entries-table">
-        <thead><tr><th>Photo</th><th>Name</th><th>Status</th></tr></thead>
-        <tbody id="entries-body"></tbody>
-      </table>
+      <div class="bg-blue-900 rounded-lg overflow-hidden border border-blue-600">
+        <table class="w-full text-sm text-left">
+          <thead class="bg-blue-800 text-blue-300"><tr><th class="p-3">Photo</th><th class="p-3">Name</th><th class="p-3">Status</th></tr></thead>
+          <tbody id="entries-body"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA3nYu-FUpbA0Hm1uzt0fYKtXn3WR72atI",
@@ -147,28 +59,59 @@
       projectId: "pi-hcs-docent-attendance",
       storageBucket: "pi-hcs-docent-attendance.firebasestorage.app",
       messagingSenderId: "134285081550",
-      appId: "1:134285081550:web:eefb0be937316ca393899f",
-      measurementId: "G-KXYJG21NBT"
+      appId: "1:134285081550:web:eefb0be937316ca393899f"
     };
-
-    window.showAlert = (msg) => {
-      document.getElementById('alert-msg').textContent = msg;
-      document.getElementById('alert-modal').classList.add('active');
-    };
-    window.closeAlert = () => document.getElementById('alert-modal').classList.remove('active');
 
     try {
       const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
       const db = getFirestore(app);
+      const storage = getStorage(app);
+      const auth = getAuth(app);
 
-      signInAnonymously(auth).then(() => {
-        console.log("Connected to database successfully");
-      }).catch((err) => {
-        window.showAlert("Auth Failed: " + err.message);
+      signInAnonymously(auth).catch(err => alert("Auth Failed: " + err.message));
+
+      let selectedFile = null;
+      document.getElementById('camera-input').onchange = (e) => {
+        selectedFile = e.target.files[0];
+        document.getElementById('photo-label').textContent = "Photo selected! ✅";
+      };
+
+      async function checkIn(status) {
+        const name = document.getElementById('docent-name').value;
+        if (!name || !selectedFile) { alert("Please enter name and take a photo!"); return; }
+
+        try {
+          const storageRef = ref(storage, 'photos/' + Date.now());
+          await uploadBytes(storageRef, selectedFile);
+          const url = await getDownloadURL(storageRef);
+
+          await addDoc(collection(db, "attendance"), {
+            name, photo: url, status, timestamp: serverTimestamp()
+          });
+          alert("Success!");
+          document.getElementById('docent-name').value = "";
+          document.getElementById('photo-label').textContent = "Take a picture of yourself";
+        } catch (err) { alert("Error: " + err.message); }
+      }
+
+      document.getElementById('btn-in').onclick = () => checkIn("In");
+      document.getElementById('btn-out').onclick = () => checkIn("Out");
+
+      onSnapshot(query(collection(db, "attendance"), orderBy("timestamp", "desc")), (snap) => {
+        const tbody = document.getElementById('entries-body');
+        tbody.innerHTML = "";
+        snap.forEach(doc => {
+          const data = doc.data();
+          tbody.innerHTML += `
+            <tr class="border-b border-blue-800">
+              <td class="p-3"><img src="${data.photo}" class="w-10 h-10 rounded object-cover"></td>
+              <td class="p-3">${data.name}</td>
+              <td class="p-3">${data.status}</td>
+            </tr>`;
+        });
       });
     } catch (err) {
-      window.showAlert("Error initializing: " + err.message);
+      alert("System Error: " + err.message);
     }
   </script>
 </body>
