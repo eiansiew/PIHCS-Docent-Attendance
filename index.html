@@ -6,14 +6,8 @@
   <title>PIHCS Docent Attendance</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @font-face {
-      font-family: 'SystemMono';
-      src: url('MDSystemMonoTrial-Medium.otf') format('opentype');
-    }
-    @font-face {
-      font-family: 'Buzz';
-      src: url('TRIAL_OTT_Buzz.otf') format('opentype');
-    }
+    @font-face { font-family: 'SystemMono'; src: url('MDSystemMonoTrial-Medium.otf') format('opentype'); }
+    @font-face { font-family: 'Buzz'; src: url('TRIAL_OTT_Buzz.otf') format('opentype'); }
     body { background-color: #0957C3; color: white; font-family: 'SystemMono', sans-serif; }
     h1 { font-family: 'Buzz', sans-serif; }
   </style>
@@ -26,6 +20,9 @@
     </header>
 
     <div class="space-y-4">
+      <!-- Status Message Area -->
+      <div id="status-msg" class="text-sm p-2 bg-blue-800 rounded hidden"></div>
+
       <input type="text" id="docent-name" placeholder="Full Name" class="w-full p-3 rounded-lg bg-blue-900 border border-blue-600 text-white placeholder-blue-300">
       
       <label class="block w-full p-4 text-center border-2 border-dashed border-blue-400 rounded-lg cursor-pointer hover:bg-blue-800 transition">
@@ -62,57 +59,66 @@
       appId: "1:134285081550:web:eefb0be937316ca393899f"
     };
 
-    try {
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-      const storage = getStorage(app);
-      const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const auth = getAuth(app);
 
-      signInAnonymously(auth).catch(err => alert("Auth Failed: " + err.message));
-
-      let selectedFile = null;
-      document.getElementById('camera-input').onchange = (e) => {
-        selectedFile = e.target.files[0];
-        document.getElementById('photo-label').textContent = "Photo selected! ✅";
-      };
-
-      async function checkIn(status) {
-        const name = document.getElementById('docent-name').value;
-        if (!name || !selectedFile) { alert("Please enter name and take a photo!"); return; }
-
-        try {
-          const storageRef = ref(storage, 'photos/' + Date.now());
-          await uploadBytes(storageRef, selectedFile);
-          const url = await getDownloadURL(storageRef);
-
-          await addDoc(collection(db, "attendance"), {
-            name, photo: url, status, timestamp: serverTimestamp()
-          });
-          alert("Success!");
-          document.getElementById('docent-name').value = "";
-          document.getElementById('photo-label').textContent = "Take a picture of yourself";
-        } catch (err) { alert("Error: " + err.message); }
-      }
-
-      document.getElementById('btn-in').onclick = () => checkIn("In");
-      document.getElementById('btn-out').onclick = () => checkIn("Out");
-
-      onSnapshot(query(collection(db, "attendance"), orderBy("timestamp", "desc")), (snap) => {
-        const tbody = document.getElementById('entries-body');
-        tbody.innerHTML = "";
-        snap.forEach(doc => {
-          const data = doc.data();
-          tbody.innerHTML += `
-            <tr class="border-b border-blue-800">
-              <td class="p-3"><img src="${data.photo}" class="w-10 h-10 rounded object-cover"></td>
-              <td class="p-3">${data.name}</td>
-              <td class="p-3">${data.status}</td>
-            </tr>`;
-        });
-      });
-    } catch (err) {
-      alert("System Error: " + err.message);
+    const statusDiv = document.getElementById('status-msg');
+    function showStatus(msg) {
+        statusDiv.textContent = msg;
+        statusDiv.classList.remove('hidden');
+        setTimeout(() => statusDiv.classList.add('hidden'), 5000);
     }
+
+    signInAnonymously(auth).catch(err => console.error("Auth Error:", err));
+
+    let selectedFile = null;
+    document.getElementById('camera-input').onchange = (e) => {
+      selectedFile = e.target.files[0];
+      if (selectedFile) document.getElementById('photo-label').textContent = "Photo Taken! ✅";
+    };
+
+    async function checkIn(status) {
+      const name = document.getElementById('docent-name').value;
+      if (!name) { showStatus("Please enter your name!"); return; }
+      if (!selectedFile) { showStatus("Please take a photo!"); return; }
+
+      try {
+        showStatus("Uploading...");
+        const storageRef = ref(storage, 'photos/' + Date.now());
+        await uploadBytes(storageRef, selectedFile);
+        const url = await getDownloadURL(storageRef);
+
+        await addDoc(collection(db, "attendance"), {
+          name, photo: url, status, timestamp: serverTimestamp()
+        });
+        showStatus("Success! Checked " + status);
+        document.getElementById('docent-name').value = "";
+        document.getElementById('photo-label').textContent = "Take a picture of yourself in the space";
+        selectedFile = null;
+      } catch (err) { 
+        console.error("Error:", err);
+        showStatus("Error: " + err.message); 
+      }
+    }
+
+    document.getElementById('btn-in').addEventListener('click', () => checkIn("In"));
+    document.getElementById('btn-out').addEventListener('click', () => checkIn("Out"));
+
+    onSnapshot(query(collection(db, "attendance"), orderBy("timestamp", "desc")), (snap) => {
+      const tbody = document.getElementById('entries-body');
+      tbody.innerHTML = "";
+      snap.forEach(doc => {
+        const data = doc.data();
+        tbody.innerHTML += `
+          <tr class="border-b border-blue-800">
+            <td class="p-3"><img src="${data.photo}" class="w-10 h-10 rounded object-cover"></td>
+            <td class="p-3">${data.name}</td>
+            <td class="p-3">${data.status}</td>
+          </tr>`;
+      });
+    }, (err) => console.error("Firestore Listen Error:", err));
   </script>
 </body>
 </html>
