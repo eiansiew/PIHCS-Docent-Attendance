@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Prototype Island Homecoming showcase Docent's Attendance</title>
+  
+  <style>
+    @font-face {
+      font-family: 'CustomTitleFont';
+      src: url('title-font.ttf') format('truetype'); /* Replace with your actual title font filename */
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'CustomBodyFont';
+      src: url('body-font.ttf') format('truetype'); /* Replace with your actual body font filename */
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    :root {
+      /* Pantone 2132 C as main background */
+      --bg-color: #0957C3;
+      --surface-color: #074BA8; /* Solid slightly darker blue for cards/inputs */
+      --text-main: #ffffff;
+      --text-muted: #b0ccef; 
+      --border-color: #176BDE; 
+      
+      /* Pantone 2132 C */
+      --pantone-main: #0957C3;
+      
+      /* Light Grey Accents */
+      --accent-grey: #f8fafc;
+      --accent-grey-muted: #cbd5e1;
+      
+      /* Thematic accents */
+      --accent-in: var(--accent-grey); 
+      --accent-out: transparent;
+      --accent-out-border: var(--accent-grey-muted);
+      --accent-out-text: var(--accent-grey-muted);
+      --btn-text: var(--pantone-main); /* Blue text on the Check-in button */
+      --danger: #ff8b94;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'CustomBodyFont', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 16px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding-bottom: 40px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    header h1 {
+      font-family: 'CustomTitleFont', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .header-subtitle {
+      display: block;
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--surface-color);
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+
+    input::placeholder {
+      color: #ffffff;
+      opacity: 0.9;
+      font-weight: bold;
+    }
+
+    input[type="text"]:focus, input[type="password"]:focus {
+      outline: 2px solid var(--accent-grey);
+      border-color: transparent;
+    }
+
+    .camera-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      padding: 16px;
+      background-color: rgba(255, 255, 255, 0.05); 
+      border: 1px dashed var(--accent-grey-muted);
+      border-radius: 8px;
+      color: var(--accent-grey);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .camera-btn:active {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .preview-area {
+      display: none; /* Shown via JS */
+      text-align: center;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: var(--surface-color);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .preview-area img {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+    }
+
+    .preview-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      color: var(--btn-text);
+      transition: opacity 0.2s;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-in { 
+      background-color: var(--accent-in); 
+      color: var(--btn-text);
+      border: 2px solid var(--accent-in);
+      flex: 1; 
+    }
+    
+    .btn-out { 
+      background-color: var(--accent-out); 
+      color: var(--accent-out-text);
+      border: 2px solid var(--accent-out-border);
+      flex: 1; 
+    }
+    
+    .table-wrapper {
+      background: var(--surface-color);
+      border-radius: 8px;
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .td-photo img {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 4px;
+      display: block;
+    }
+
+    .time-in { color: var(--accent-grey); font-weight: bold; }
+    .time-out { color: var(--accent-grey-muted); font-weight: bold; }
+    .time-val { font-size: 0.8rem; color: var(--text-muted); display: block; margin-top: 4px;}
+
+    .btn-delete {
+      background: transparent;
+      padding: 8px;
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      border: none;
+      transition: color 0.2s;
+    }
+    
+    .btn-delete:hover {
+      color: var(--danger);
+    }
+
+    /* Custom Modal UI for Alert & Prompt */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: none; justify-content: center; align-items: center;
+      z-index: 1000; padding: 16px;
+    }
+    .modal-overlay.active { display: flex; }
+    
+    .modal-box {
+      background: var(--surface-color);
+      padding: 24px; border-radius: 12px;
+      width: 100%; max-width: 340px;
+      text-align: center; border: 1px solid var(--border-color);
+    }
+    
+    .modal-msg { margin-bottom: 20px; font-size: 1.05rem; }
+    
+    .modal-btn-row { display: flex; gap: 12px; justify-content: center; }
+    .modal-btn { padding: 10px 20px; font-size: 1rem; border-radius: 6px; }
+    .modal-btn-primary { background: var(--text-main); color: var(--bg-color); }
+    .modal-btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); }
+  </style>
+</head>
+<body>
+
+  <!-- Custom Alert Modal -->
+  <div id="alert-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div id="alert-msg" class="modal-msg"></div>
+      <button class="modal-btn modal-btn-primary" onclick="closeAlert()">OK</button>
+    </div>
+  </div>
+
+  <!-- Custom Prompt Modal for Admin -->
+  <div id="prompt-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div id="prompt-msg" class="modal-msg">Enter Administrator Password:</div>
+      <input type="password" id="prompt-input" class="form-group" placeholder="Password" style="margin-bottom: 20px;">
+      <div class="modal-btn-row">
+        <button class="modal-btn modal-btn-secondary" onclick="closePrompt(false)">Cancel</button>
+        <button class="modal-btn modal-btn-primary" onclick="closePrompt(true)">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>
+        Prototype Island Homecoming Showcase
+        <span class="header-subtitle">Docent's Attendance</span>
+      </h1>
+    </header>
+
+    <div class="form-group">
+      <label for="docent-name" class="visually-hidden" style="display:none;">Full Name</label>
+      <input type="text" id="docent-name" placeholder="Full Name" aria-label="Full Name">
+    </div>
+
+    <div class="form-group">
+      <label class="camera-btn" aria-label="Take a picture of yourself in the space">
+        📷 Take a picture of yourself in the space
+        <input type="file" id="camera-input" accept="image/*" capture="environment">
+      </label>
+    </div>
+
+    <div id="preview-area" class="preview-area">
+      <img id="preview-img" alt="Compressed photo thumbnail">
+      <div class="preview-text">Photo attached & compressed</div>
+    </div>
+
+    <div class="action-row">
+      <button type="button" class="btn-in" id="btn-in">Check in</button>
+      <button type="button" class="btn-out" id="btn-out">Check out</button>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Photo</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="entries-body">
+          <!-- Populated by Firebase -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithEmailAndPassword, signInWithCustomToken, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, orderBy, limit, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Configuration & Placeholders
+    const ADMIN_EMAIL = "sieweian23@gmail.com"; 
+    
+    // Environment handling (works in standalone and Immersive environments)
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'docent-attendance-app';
+    const rawConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+    
+    // Using your exact Firebase configuration
+    const fallbackConfig = {
+      apiKey: "AIzaSyA3nYu-FUpbA0Hm1uzt0fYKtXn3WR72aTI",
+      authDomain: "pi-hcs-docent-attendance.firebaseapp.com",
+      projectId: "pi-hcs-docent-attendance",
+      storageBucket: "pi-hcs-docent-attendance.firebasestorage.app",
+      messagingSenderId: "134285081550",
+      appId: "1:134285081550:web:eefb0be937316ca393899f",
+      measurementId: "G-KXYJG21NBT"
+    };
+
+    const firebaseConfig = rawConfig ? JSON.parse(rawConfig) : fallbackConfig;
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // Ensure we write to the correct environment collection
+    const COLLECTION_PATH = `artifacts/${appId}/public/data/entries`; 
+
+    // Custom UI Modals (Replacing alert/prompt)
+    window.showAlert = (msg) => {
+      document.getElementById('alert-msg').textContent = msg;
+      document.getElementById('alert-modal').classList.add('active');
+    };
+    window.closeAlert = () => document.getElementById('alert-modal').classList.remove('active');
+
+    let promptCallback = null;
+    window.showPrompt = (msg, cb) => {
+      document.getElementById('prompt-msg').textContent = msg;
+      document.getElementById('prompt-input').value = '';
+      document.getElementById('prompt-modal').classList.add('active');
+      promptCallback = cb;
+    };
+    window.closePrompt = (isSubmit) => {
+      document.getElementById('prompt-modal').classList.remove('active');
+      const val = document.getElementById('prompt-input').value;
+      if (promptCallback) promptCallback(isSubmit ? val : null);
+    };
+
+    let currentPhotoDataUrl = null;
+    let isProcessing = false;
+
+    // DOM Elements
+    const nameInput = document.getElementById('docent-name');
+    const cameraInput = document.getElementById('camera-input');
+    const previewArea = document.getElementById('preview-area');
+    const previewImg = document.getElementById('preview-img');
+    const btnIn = document.getElementById('btn-in');
+    const btnOut = document.getElementById('btn-out');
+    const entriesBody = document.getElementById('entries-body');
+
+    function setButtonsState(disabled) {
+      isProcessing = disabled;
+      if (btnIn) btnIn.disabled = disabled;
+      if (btnOut) btnOut.disabled = disabled;
+    }
+
+    if (cameraInput) {
+      cameraInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              let { width, height } = img;
+              const maxEdge = 320;
+
+              if (width > height) {
+                if (width > maxEdge) { height *= maxEdge / width; width = maxEdge; }
+              } else {
+                if (height > maxEdge) { width *= maxEdge / height; height = maxEdge; }
+              }
+
+              canvas.width = Math.round(width);
+              canvas.height = Math.round(height);
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+              currentPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.68);
+              previewImg.src = currentPhotoDataUrl;
+              previewArea.style.display = 'block';
+            } catch (err) {
+              window.showAlert("Image processing failed. Please try again.");
+              console.error(err);
+            }
+          };
+          img.onerror = () => window.showAlert("The selected image format could not be processed.");
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function submitEntry(type) {
+      if (isProcessing) return;
+      
+      const name = nameInput?.value.trim();
+      if (!name) return window.showAlert("Please enter your full name.");
+      if (!currentPhotoDataUrl) return window.showAlert("Please take a picture on-site to check in/out.");
+      if (!auth.currentUser) return window.showAlert("Not authenticated with database. Please refresh.");
+
+      setButtonsState(true);
+
+      try {
+        await addDoc(collection(db, COLLECTION_PATH), {
+          name: name,
+          thumb: currentPhotoDataUrl,
+          type: type,
+          submitted_at: serverTimestamp()
+        });
+
+        // Reset photo state but KEEP name
+        currentPhotoDataUrl = null;
+        if (cameraInput) cameraInput.value = '';
+        if (previewArea) previewArea.style.display = 'none';
+        
+      } catch (err) {
+        window.showAlert("Firestore write failed: " + err.message);
+        console.error("Write error:", err);
+      } finally {
+        setButtonsState(false);
+      }
+    }
+
+    if (btnIn) btnIn.addEventListener('click', () => submitEntry('in'));
+    if (btnOut) btnOut.addEventListener('click', () => submitEntry('out'));
+
+    function setupRealtimeListener() {
+      const q = query(collection(db, COLLECTION_PATH), orderBy('submitted_at', 'desc'), limit(200));
+      
+      onSnapshot(q, (snapshot) => {
+        if (!entriesBody) return;
+        entriesBody.innerHTML = '';
+        const total = snapshot.docs.length;
+
+        snapshot.forEach((docSnap, index) => {
+          const data = docSnap.data({ serverTimestamps: "estimate" }); // Handle pending local writes
+          const rowNum = total - index;
+          
+          let timeStr = "Pending...";
+          if (data.submitted_at) {
+            const d = data.submitted_at.toDate();
+            timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          }
+
+          const tr = document.createElement('tr');
+          const typeClass = data.type === 'in' ? 'time-in' : 'time-out';
+          const typeLabel = data.type === 'in' ? 'CHECK IN' : 'CHECK OUT';
+
+          tr.innerHTML = `
+            <td>${rowNum}</td>
+            <td class="td-photo"><img src="${data.thumb}" alt="Photo"></td>
+            <td>${data.name}</td>
+            <td>
+              <span class="${typeClass}">${typeLabel}</span>
+              <span class="time-val">${timeStr}</span>
+            </td>
+            <td>
+              <button type="button" class="btn-delete" aria-label="Delete entry" data-id="${docSnap.id}">🗑️</button>
+            </td>
+          `;
+          entriesBody.appendChild(tr);
+        });
+      }, (err) => {
+        if (err.code === 'permission-denied') {
+          window.showAlert("Permission denied reading records. Check Firestore rules.");
+        } else {
+          console.error("Listener error:", err);
+        }
+      });
+    }
+
+    async function initializeAuth() {
+      try {
+        // Authenticate to read/write based on system requirements
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+        setupRealtimeListener();
+      } catch (err) {
+        window.showAlert("Authentication failed. Cannot connect to database.");
+        console.error(err);
+      }
+    }
+
+    if (entriesBody) {
+      entriesBody.addEventListener('click', (e) => {
+        const delBtn = e.target.closest('.btn-delete');
+        if (!delBtn) return;
+        
+        const docId = delBtn.getAttribute('data-id');
+        
+        window.showPrompt("Enter Administrator Password:", async (pwd) => {
+          if (!pwd) return;
+          
+          setButtonsState(true);
+          try {
+            // Sign in as admin to pass Security Rules
+            await signInWithEmailAndPassword(auth, ADMIN_EMAIL, pwd);
+            await deleteDoc(doc(db, COLLECTION_PATH, docId));
+            
+          } catch (err) {
+            window.showAlert("Deletion failed: " + err.message);
+          } finally {
+            // Revert back to anonymous authentication for normal operations
+            await signOut(auth);
+            await initializeAuth();
+            setButtonsState(false);
+          }
+        });
+      });
+    }
+
+    // Start App
+    initializeAuth();
+  </script>
+</body>
+</html>
