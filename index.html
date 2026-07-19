@@ -1,55 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PIHCS Docent Attendance</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Docent Attendance — Shared (Firestore)</title>
   <style>
     @font-face { font-family: 'SystemMono'; src: url('MDSystemMonoTrial-Medium.otf') format('opentype'); }
     @font-face { font-family: 'Buzz'; src: url('TRIAL_OTT_Buzz.otf') format('opentype'); }
-    body { background-color: #0957C3; color: white; font-family: 'SystemMono', sans-serif; }
-    h1 { font-family: 'Buzz', sans-serif; }
+    :root { --bg:#0957C3; --card:#0b1e38; --muted:#93c5fd; --text:#ffffff; --accent:#3b82f6; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family: 'SystemMono', sans-serif; background:var(--bg);color:var(--text);padding-bottom:16px}
+    header{padding:20px 16px 6px; max-width:860px; margin:auto}
+    h1{margin:0 0 6px; font-family: 'Buzz', sans-serif; font-size:clamp(20px,4.5vw,28px)}
+    p.sub{margin:0; color:var(--muted); font-size:15px}
+    main{max-width:860px; margin:10px auto 80px; padding:0 16px; display:grid; gap:12px}
+    .card{background:var(--card); border:1px solid #1e40af; padding:14px; border-radius:16px; box-shadow:0 10px 20px rgba(0,0,0,.25)}
+    label{display:block; font-weight:600; margin-bottom:8px}
+    input[type="text"], input[type="file"]{width:100%; background:#0f172a; color:var(--text); border:1px solid #1e40af; border-radius:14px; padding:14px 16px; font-size:16px}
+    .row{display:grid; gap:12px; grid-template-columns:1fr}
+    .actions{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px}
+    .btn-in{background:#ffffff; color:#0957C3; font-weight:700}
+    .btn-out{background:transparent; border:1px solid #93c5fd; color:#ffffff; font-weight:700}
+    button{border:none; padding:16px 18px; border-radius:16px; cursor:pointer; width:100%; font-size:16px}
+    table{width:100%; border-collapse:collapse}
+    th,td{padding:12px 10px; border-bottom:1px solid #1e40af; text-align:left; vertical-align:middle}
+    .thumb{width:64px;height:64px;object-fit:cover;border-radius:12px;border:1px solid #1e40af}
+    .trashBtn{background:#1e3a8a; border:none; color:#ffffff; padding:8px 10px; border-radius:10px; cursor:pointer}
+    @media (min-width:720px){ .row{grid-template-columns:1fr 1fr} }
+    .custom-upload-btn { display: block; width: 100%; background: #3b82f6; color: #fff; padding: 14px 16px; border-radius: 12px; cursor: pointer; text-align: center; font-weight:600; }
   </style>
+  <script>
+    const MAX_THUMB_EDGE = 320;
+    const JPEG_QUALITY   = 0.68;
+    const ADMIN_EMAIL = "sieweian23@gmail.com";
+  </script>
 </head>
-<body class="p-4">
-  <div class="max-w-md mx-auto">
-    <header class="text-center mb-6">
-      <h1 class="text-3xl font-bold">PROTOTYPE ISLAND HOMECOMING</h1>
-      <p class="text-blue-200">DOCENT'S ATTENDANCE</p>
-    </header>
+<body>
+  <header>
+    <h1>PROTOTYPE ISLAND HOMECOMING SHOWCASE</h1>
+    <p class="sub">DOCENT'S ATTENDANCE</p>
+  </header>
 
-    <div class="space-y-4">
-      <!-- Status Message Area -->
-      <div id="status-msg" class="text-sm p-2 bg-blue-800 rounded hidden"></div>
-
-      <input type="text" id="docent-name" placeholder="Full Name" class="w-full p-3 rounded-lg bg-blue-900 border border-blue-600 text-white placeholder-blue-300">
-      
-      <label class="block w-full p-4 text-center border-2 border-dashed border-blue-400 rounded-lg cursor-pointer hover:bg-blue-800 transition">
-        📷 <span id="photo-label">Take a picture of yourself</span>
-        <input type="file" id="camera-input" accept="image/*" capture="environment" class="hidden">
-      </label>
-
-      <div class="flex gap-4">
-        <button id="btn-in" class="flex-1 p-4 bg-white text-blue-900 font-bold rounded-lg shadow-lg hover:bg-gray-100 transition">Check in</button>
-        <button id="btn-out" class="flex-1 p-4 bg-transparent border border-blue-400 text-blue-100 rounded-lg hover:bg-blue-800 transition">Check out</button>
+  <main>
+  <section class="card">
+    <div class="row">
+      <div>
+        <label for="fullName">Full name</label>
+        <input id="fullName" type="text" placeholder="e.g., Tan Wei Ming" autocomplete="name" />
       </div>
-
-      <div class="bg-blue-900 rounded-lg overflow-hidden border border-blue-600">
-        <table class="w-full text-sm text-left">
-          <thead class="bg-blue-800 text-blue-300"><tr><th class="p-3">Photo</th><th class="p-3">Name</th><th class="p-3">Status</th></tr></thead>
-          <tbody id="entries-body"></tbody>
-        </table>
+      <div>
+        <label>Photo</label>
+        <input id="photo" type="file" accept="image/*" capture="environment" style="display:none;" />
+        <label for="photo" class="custom-upload-btn">📷 Take a picture</label>
       </div>
     </div>
-  </div>
+    <div class="actions">
+      <button class="btn-in" id="checkInBtn">Check in</button>
+      <button class="btn-out" id="checkOutBtn">Check out</button>
+    </div>
+  </section>
+
+    <section class="card">
+      <div style="overflow:auto">
+        <table id="logTable">
+          <thead><tr><th>#</th><th>Photo</th><th>Name</th><th>Time</th><th>Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+    // 🔑 REPLACE WITH YOUR CONFIG FROM FIREBASE CONSOLE
     const firebaseConfig = {
       apiKey: "AIzaSyA3nYu-FUpbA0Hm1uzt0fYKtXn3WR72atI",
       authDomain: "pi-hcs-docent-attendance.firebaseapp.com",
@@ -59,66 +85,67 @@
       appId: "1:134285081550:web:eefb0be937316ca393899f"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
+    const app  = initializeApp(firebaseConfig);
+    const db   = getFirestore(app);
     const auth = getAuth(app);
+    const entriesRef = collection(db, "entries");
 
-    const statusDiv = document.getElementById('status-msg');
-    function showStatus(msg) {
-        statusDiv.textContent = msg;
-        statusDiv.classList.remove('hidden');
-        setTimeout(() => statusDiv.classList.add('hidden'), 5000);
-    }
-
-    signInAnonymously(auth).catch(err => console.error("Auth Error:", err));
-
-    let selectedFile = null;
-    document.getElementById('camera-input').onchange = (e) => {
-      selectedFile = e.target.files[0];
-      if (selectedFile) document.getElementById('photo-label').textContent = "Photo Taken! ✅";
-    };
-
-    async function checkIn(status) {
-      const name = document.getElementById('docent-name').value;
-      if (!name) { showStatus("Please enter your name!"); return; }
-      if (!selectedFile) { showStatus("Please take a photo!"); return; }
-
-      try {
-        showStatus("Uploading...");
-        const storageRef = ref(storage, 'photos/' + Date.now());
-        await uploadBytes(storageRef, selectedFile);
-        const url = await getDownloadURL(storageRef);
-
-        await addDoc(collection(db, "attendance"), {
-          name, photo: url, status, timestamp: serverTimestamp()
-        });
-        showStatus("Success! Checked " + status);
-        document.getElementById('docent-name').value = "";
-        document.getElementById('photo-label').textContent = "Take a picture of yourself in the space";
-        selectedFile = null;
-      } catch (err) { 
-        console.error("Error:", err);
-        showStatus("Error: " + err.message); 
-      }
-    }
-
-    document.getElementById('btn-in').addEventListener('click', () => checkIn("In"));
-    document.getElementById('btn-out').addEventListener('click', () => checkIn("Out"));
-
-    onSnapshot(query(collection(db, "attendance"), orderBy("timestamp", "desc")), (snap) => {
-      const tbody = document.getElementById('entries-body');
-      tbody.innerHTML = "";
-      snap.forEach(doc => {
-        const data = doc.data();
-        tbody.innerHTML += `
-          <tr class="border-b border-blue-800">
-            <td class="p-3"><img src="${data.photo}" class="w-10 h-10 rounded object-cover"></td>
-            <td class="p-3">${data.name}</td>
-            <td class="p-3">${data.status}</td>
-          </tr>`;
+    async function toThumb(file){
+      return new Promise((resolve)=>{
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = ()=>{
+          const r = Math.min(1, MAX_THUMB_EDGE/Math.max(img.width, img.height));
+          const w = Math.round(img.width*r), h = Math.round(img.height*r);
+          const c = document.createElement("canvas"); c.width=w; c.height=h;
+          c.getContext("2d").drawImage(img,0,0,w,h);
+          resolve(c.toDataURL("image/jpeg", JPEG_QUALITY));
+          URL.revokeObjectURL(url);
+        };
+        img.src = url;
       });
-    }, (err) => console.error("Firestore Listen Error:", err));
+    }
+
+    async function handleSubmit(kind){
+      const name = document.getElementById("fullName").value.trim();
+      const file = document.getElementById("photo").files[0];
+      if (!name) { alert("Please enter your name."); return; }
+      if (!file) { alert("Please take a photo."); return; }
+      const thumb = await toThumb(file);
+      await addDoc(entriesRef, { name, thumb, type: kind, submitted_at: serverTimestamp() });
+      document.getElementById("fullName").value = "";
+      alert("Submitted successfully!");
+    }
+
+    const tbody = document.querySelector("#logTable tbody");
+    onSnapshot(query(entriesRef, orderBy("submitted_at", "desc"), limit(50)), (snap)=>{
+      tbody.innerHTML = "";
+      snap.forEach((d, i)=>{
+        const x = d.data();
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${snap.size - i}</td>
+          <td><img class="thumb" src="${x.thumb}"></td>
+          <td>${x.name}</td>
+          <td>${x.submitted_at?.toDate().toLocaleTimeString()}</td>
+          <td><button class="trashBtn" data-id="${d.id}">🗑️</button></td>`;
+        tbody.appendChild(tr);
+      });
+    });
+
+    document.getElementById("checkInBtn").addEventListener("click", ()=>handleSubmit("in"));
+    document.getElementById("checkOutBtn").addEventListener("click", ()=>handleSubmit("out"));
+
+    tbody.addEventListener("click", async (ev)=>{
+      if (!ev.target.matches(".trashBtn")) return;
+      const pwd = prompt("Admin password:");
+      if (!pwd) return;
+      try {
+        await signInWithEmailAndPassword(auth, ADMIN_EMAIL, pwd);
+        await deleteDoc(doc(db, "entries", ev.target.dataset.id));
+        await signOut(auth);
+      } catch(e) { alert("Action failed: " + e.message); }
+    });
   </script>
 </body>
 </html>
