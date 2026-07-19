@@ -1,44 +1,67 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Docent Attendance — Shared (Firestore)</title>
   <style>
-    @font-face { font-family: 'SystemMono'; src: url('MDSystemMonoTrial-Medium.otf') format('opentype'); }
-    @font-face { font-family: 'Buzz'; src: url('TRIAL_OTT_Buzz.otf') format('opentype'); }
-    :root { --bg:#0957C3; --card:#0b1e38; --muted:#93c5fd; --text:#ffffff; --accent:#3b82f6; }
+    :root { --bg:#0b0d10; --card:#12161c; --muted:#7c8da5; --text:#e9eef6; --accent:#3b82f6; }
     *{box-sizing:border-box}
-    body{margin:0;font-family: 'SystemMono', sans-serif; background:var(--bg);color:var(--text);padding-bottom:16px}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;background:var(--bg);color:var(--text);padding-bottom:16px}
     header{padding:20px 16px 6px; max-width:860px; margin:auto}
-    h1{margin:0 0 6px; font-family: 'Buzz', sans-serif; font-size:clamp(20px,4.5vw,28px)}
+    h1{margin:0 0 6px; font-size:clamp(20px,4.5vw,28px)}
     p.sub{margin:0; color:var(--muted); font-size:15px}
     main{max-width:860px; margin:10px auto 80px; padding:0 16px; display:grid; gap:12px}
-    .card{background:var(--card); border:1px solid #1e40af; padding:14px; border-radius:16px; box-shadow:0 10px 20px rgba(0,0,0,.25)}
+    .card{background:var(--card); border:1px solid #1e2430; padding:14px; border-radius:16px; box-shadow:0 10px 20px rgba(0,0,0,.25)}
     label{display:block; font-weight:600; margin-bottom:8px}
-    input[type="text"], input[type="file"]{width:100%; background:#0f172a; color:var(--text); border:1px solid #1e40af; border-radius:14px; padding:14px 16px; font-size:16px}
+    input[type="text"], input[type="file"]{width:100%; background:#0f1319; color:var(--text); border:1px solid #1f2733; border-radius:14px; padding:14px 16px; font-size:16px}
+    input[type="file"]{padding:12px}
     .row{display:grid; gap:12px; grid-template-columns:1fr}
     .actions{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px}
-    .btn-in{background:#ffffff; color:#0957C3; font-weight:700}
-    .btn-out{background:transparent; border:1px solid #93c5fd; color:#ffffff; font-weight:700}
-    button{border:none; padding:16px 18px; border-radius:16px; cursor:pointer; width:100%; font-size:16px}
+    .btn-in{background:#a7f3d0;color:#0b0d10;font-weight:700}
+    .btn-out{background:#fecaca;color:#0b0d10;font-weight:700}
+    .ts-in{color:#86efac;font-weight:700}
+    .ts-out{color:#fca5a5;font-weight:700}
+    button{border:1px solid #2a3444; padding:16px 18px; border-radius:16px; cursor:pointer; width:100%; font-size:16px}
     table{width:100%; border-collapse:collapse}
-    th,td{padding:12px 10px; border-bottom:1px solid #1e40af; text-align:left; vertical-align:middle}
-    .thumb{width:64px;height:64px;object-fit:cover;border-radius:12px;border:1px solid #1e40af}
-    .trashBtn{background:#1e3a8a; border:none; color:#ffffff; padding:8px 10px; border-radius:10px; cursor:pointer}
+    th,td{padding:12px 10px; border-bottom:1px solid #1e2430; text-align:left; vertical-align:middle}
+    th{position:sticky; top:0; background:#12161c}
+    .hint{color:var(--muted); font-size:13px}
+    .thumb{width:64px;height:64px;object-fit:cover;border-radius:12px;border:1px solid #232b39}
+    .trashBtn{background:#17202b;border:1px solid #2a3444;color:#e9eef6;padding:8px 10px;border-radius:10px;font-size:14px;line-height:1;cursor:pointer}
+    .trashBtn:active{transform:scale(0.98)}
     @media (min-width:720px){ .row{grid-template-columns:1fr 1fr} }
-    .custom-upload-btn { display: block; width: 100%; background: #3b82f6; color: #fff; padding: 14px 16px; border-radius: 12px; cursor: pointer; text-align: center; font-weight:600; }
+    
+    .custom-upload-btn {
+      display: block; width: 100%; background: #3b82f6; color: #fff; padding: 14px 16px; border-radius: 12px; cursor: pointer; font-weight: 600; text-align: center; font-size: 16px;
+    }
+    .custom-upload-btn:hover { background: #2563eb; }
+    
+    /* Message overlay */
+    #msgOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; }
+    .msgBox { background: var(--card); padding: 20px; border-radius: 16px; text-align: center; max-width: 300px; }
   </style>
   <script>
     const MAX_THUMB_EDGE = 320;
     const JPEG_QUALITY   = 0.68;
     const ADMIN_EMAIL = "sieweian23@gmail.com";
+    const ADMIN_PASSWORD_HINT = "3impactfuture";
+
+    function showStatus(msg) {
+      const overlay = document.getElementById('msgOverlay');
+      const box = document.getElementById('msgContent');
+      box.innerText = msg;
+      overlay.style.display = 'flex';
+      setTimeout(() => { overlay.style.display = 'none'; }, 2000);
+    }
   </script>
 </head>
 <body>
+  <div id="msgOverlay"><div class="msgBox" id="msgContent"></div></div>
+
   <header>
-    <h1>PROTOTYPE ISLAND HOMECOMING SHOWCASE</h1>
-    <p class="sub">DOCENT'S ATTENDANCE</p>
+    <h1>Docent Attendance</h1>
+    <p class="sub">Shared log: everyone will be able to view all entries. Take a photo of youreself in the exhibition and submit.</p>
   </header>
 
   <main>
@@ -46,12 +69,13 @@
     <div class="row">
       <div>
         <label for="fullName">Full name</label>
-        <input id="fullName" type="text" placeholder="e.g., Eian Siew" autocomplete="name" />
+        <input id="fullName" type="text" placeholder="e.g., Tan Wei Ming" autocomplete="name" />
       </div>
       <div>
-        <label>Photo</label>
+        <label for="photo">Photo</label>
         <input id="photo" type="file" accept="image/*" capture="environment" style="display:none;" />
         <label for="photo" class="custom-upload-btn">📷 Take a picture</label>
+        <div class="hint">Use the camera prompt for on-the-spot proof.</div>
       </div>
     </div>
     <div class="actions">
@@ -62,8 +86,10 @@
 
     <section class="card">
       <div style="overflow:auto">
-        <table id="logTable">
-          <thead><tr><th>#</th><th>Photo</th><th>Name</th><th>Time</th><th>Actions</th></tr></thead>
+        <table id="logTable" aria-label="Attendance log">
+          <thead>
+            <tr><th>#</th><th>Photo</th><th>Name</th><th>Submission Time</th><th>Actions</th></tr>
+          </thead>
           <tbody></tbody>
         </table>
       </div>
@@ -71,80 +97,103 @@
   </main>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-    // 🔑 REPLACE WITH YOUR CONFIG FROM FIREBASE CONSOLE
+    // 🔑 PLEASE ENSURE YOUR CONFIG MATCHES YOUR FIREBASE CONSOLE
     const firebaseConfig = {
-      apiKey: "AIzaSyA3nYu-FUpbA0Hm1uzt0fYKtXn3WR72atI",
-      authDomain: "pi-hcs-docent-attendance.firebaseapp.com",
-      projectId: "pi-hcs-docent-attendance",
-      storageBucket: "pi-hcs-docent-attendance.firebasestorage.app",
-      messagingSenderId: "134285081550",
-      appId: "1:134285081550:web:eefb0be937316ca393899f"
-    };
+  apiKey: "AIzaSyA3nYu-FUpbA0Hm1uzt0fYKtXn3WR72atI",
+  authDomain: "pi-hcs-docent-attendance.firebaseapp.com",
+  projectId: "pi-hcs-docent-attendance",
+  storageBucket: "pi-hcs-docent-attendance.firebasestorage.app",
+  appId: "1:134285081550:web:eefb0be937316ca393899f",
+  measurementId: "G-KXYJG21NBT"
+};
 
     const app  = initializeApp(firebaseConfig);
     const db   = getFirestore(app);
     const auth = getAuth(app);
     const entriesRef = collection(db, "entries");
 
-    async function toThumb(file){
+    async function toThumb(file, max=MAX_THUMB_EDGE){
       return new Promise((resolve)=>{
         const img = new Image();
         const url = URL.createObjectURL(file);
         img.onload = ()=>{
-          const r = Math.min(1, MAX_THUMB_EDGE/Math.max(img.width, img.height));
+          const r = Math.min(1, max/Math.max(img.width, img.height));
           const w = Math.round(img.width*r), h = Math.round(img.height*r);
           const c = document.createElement("canvas"); c.width=w; c.height=h;
           c.getContext("2d").drawImage(img,0,0,w,h);
-          resolve(c.toDataURL("image/jpeg", JPEG_QUALITY));
+          const dataUrl = c.toDataURL("image/jpeg",JPEG_QUALITY);
           URL.revokeObjectURL(url);
+          resolve(dataUrl);
         };
+        img.onerror = ()=> resolve(null);
         img.src = url;
+      });
+    }
+
+    const state = { entries: [] };
+    const tbody = document.querySelector("#logTable tbody");
+
+    function fmt(dt){
+      return new Intl.DateTimeFormat(undefined,
+        {year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(dt);
+    }
+
+    function render(){
+      tbody.innerHTML = "";
+      state.entries.forEach((e, i)=>{
+        const tsClass = e.type === "in" ? "ts-in" : (e.type === "out" ? "ts-out" : "");
+        const photo = e.thumb ? `<img class="thumb" src="${e.thumb}" alt="thumb">` : '<span class="hint">No preview</span>';
+        const rowNumber = state.entries.length - i;
+        const dt = fmt(new Date(e.submitted_at));
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${rowNumber}</td><td>${photo}</td><td>${e.name||"—"}</td><td class="${tsClass}">${dt}</td><td><button type="button" class="trashBtn" data-id="${e.id}" aria-label="Delete">🗑️</button></td>`;
+        tbody.appendChild(tr);
       });
     }
 
     async function handleSubmit(kind){
       const name = document.getElementById("fullName").value.trim();
       const file = document.getElementById("photo").files[0];
-      if (!name) { alert("Please enter your name."); return; }
-      if (!file) { alert("Please take a photo."); return; }
-      const thumb = await toThumb(file);
+      if (!name){ showStatus("Please enter your full name."); return; }
+      if (!file){ showStatus("Please take a photo."); return; }
+      const thumb = await toThumb(file, MAX_THUMB_EDGE);
+      if (!thumb){ showStatus("Cannot read image."); return; }
       await addDoc(entriesRef, { name, thumb, type: kind, submitted_at: serverTimestamp() });
-      document.getElementById("fullName").value = "";
-      alert("Submitted successfully!");
+      document.getElementById("photo").value = "";
+      showStatus("Submitted!");
     }
 
-    const tbody = document.querySelector("#logTable tbody");
-    onSnapshot(query(entriesRef, orderBy("submitted_at", "desc"), limit(50)), (snap)=>{
-      tbody.innerHTML = "";
-      snap.forEach((d, i)=>{
+    const q = query(entriesRef, orderBy("submitted_at","desc"), limit(200));
+    onSnapshot(q, (snap)=>{
+      state.entries = snap.docs.map(d=>{
         const x = d.data();
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${snap.size - i}</td>
-          <td><img class="thumb" src="${x.thumb}"></td>
-          <td>${x.name}</td>
-          <td>${x.submitted_at?.toDate().toLocaleTimeString()}</td>
-          <td><button class="trashBtn" data-id="${d.id}">🗑️</button></td>`;
-        tbody.appendChild(tr);
+        const ts = x.submitted_at?.toDate ? x.submitted_at.toDate() : new Date();
+        return { id:d.id, name:x.name||"", thumb:x.thumb||null, type:x.type||null, submitted_at: ts.toISOString() };
       });
+      render();
     });
 
     document.getElementById("checkInBtn").addEventListener("click", ()=>handleSubmit("in"));
     document.getElementById("checkOutBtn").addEventListener("click", ()=>handleSubmit("out"));
 
     tbody.addEventListener("click", async (ev)=>{
-      if (!ev.target.matches(".trashBtn")) return;
-      const pwd = prompt("Admin password:");
+      const btn = ev.target.closest?.(".trashBtn");
+      if (!btn) return;
+      const id = btn.getAttribute("data-id");
+      const pwd = prompt("Admin password:"); // This is standard browser functionality
       if (!pwd) return;
       try {
         await signInWithEmailAndPassword(auth, ADMIN_EMAIL, pwd);
-        await deleteDoc(doc(db, "entries", ev.target.dataset.id));
+        await deleteDoc(doc(db, "entries", id));
         await signOut(auth);
-      } catch(e) { alert("Action failed: " + e.message); }
+        showStatus("Deleted.");
+      } catch (err) {
+        showStatus("Error: " + err.message);
+      }
     });
   </script>
 </body>
